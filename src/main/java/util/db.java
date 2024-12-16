@@ -65,7 +65,7 @@ public class db {
         PreparedStatement ps = null;
         try {
             con = getCon();
-            String query = "INSERT INTO users (id, name, password, className, email, teacher_id, class_id, student_id) "
+            String query = "INSERT INTO user (id, name, password, className, email, teacher_id, class_id, student_id) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             ps = con.prepareStatement(query);
 
@@ -95,7 +95,7 @@ public class db {
         ResultSet rs = null;
         try {
             con = getCon();
-            String query = "SELECT * FROM users WHERE email = ?";
+            String query = "SELECT * FROM user WHERE email = ?";
             ps = con.prepareStatement(query);
             ps.setString(1, email);
 
@@ -179,40 +179,47 @@ public class db {
 
     // New method to get all students in a specific class
     public static List<Student> getStudentsByClass(String classId) throws SQLException {
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        List<Student> students = new ArrayList<>();
-        try {
-            con = getCon();
-            String query = "SELECT * FROM users WHERE class_id = ? AND student_id IS NOT NULL";
-            ps = con.prepareStatement(query);
-            ps.setString(1, classId);
+    Connection con = null;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+    List<Student> students = new ArrayList<>();
+    try {
+        con = getCon();
+        // Corrected SQL query using student_id in the user table and id in the student table
+        String query = "SELECT u.id, u.name, u.className, u.email, s.id AS student_id, s.score, s.grade " +
+                       "FROM user u " +
+                       "LEFT JOIN student s ON u.student_id = s.id " +  // Join on user.student_id and student.id
+                       "WHERE u.class_id = ? AND u.student_id IS NOT NULL";  // Ensure only users with student_id are considered
+        
+        ps = con.prepareStatement(query);
+        ps.setString(1, classId);
 
-            rs = ps.executeQuery();
+        rs = ps.executeQuery();
 
-            while (rs.next()) {
-                Student student = new Student();
-                student.setId(rs.getString("id"));
-                student.setName(rs.getString("name"));
-                student.setClassName(rs.getString("className"));
-                student.setEmail(rs.getString("email"));
-                student.setStudentId(rs.getString("student_id"));
-                student.setScore(rs.getString("score"));
-                student.setGrade(rs.getString("grade"));
-                student.setClass_id(classId);
+        while (rs.next()) {
+            Student student = new Student();
+            student.setId(rs.getString("id")); // From user table
+            student.setName(rs.getString("name")); // From user table
+            student.setClassName(rs.getString("className")); // From user table
+            student.setEmail(rs.getString("email")); // From user table
+            student.setStudentId(rs.getString("student_id")); // From student table (via alias)
+            student.setScore(rs.getString("score")); // From student table
+            student.setGrade(rs.getString("grade")); // From student table
+            student.setClass_id(classId); // Set the class ID passed to the method
 
-                students.add(student);
-            }
-
-            return students;
-        } catch (SQLException e) {
-            System.err.println("Error retrieving students: " + e.getMessage());
-            throw e;
-        } finally {
-            closeResources(con, ps, rs);
+            students.add(student);
         }
+
+        return students;
+    } catch (SQLException e) {
+        System.err.println("Error retrieving students: " + e.getMessage());
+        throw e;
+    } finally {
+        closeResources(con, ps, rs);
     }
+}
+
+
 
     // Add a Class to the database
     public static void addClass(data.Class classObj) throws SQLException {
@@ -220,14 +227,14 @@ public class db {
         PreparedStatement ps = null;
         try {
             con = getCon();
-            String query = "INSERT INTO classes (class_id, name, level, course, teacher_id) VALUES (?, ?, ?, ?, ?)";
+            String query = "INSERT INTO class (id, name, level, course) VALUES (?, ?, ?, ?)";
             ps = con.prepareStatement(query);
 
             ps.setString(1, classObj.getClassId());
             ps.setString(2, classObj.getName());
             ps.setString(3, classObj.getLevel());
             ps.setString(4, classObj.getCourse());
-            ps.setString(5, classObj.getTeacherId());
+            //ps.setString(5, classObj.getTeacherId());
 
             ps.executeUpdate();
             System.out.println("Class added successfully: " + classObj.getName());
@@ -246,14 +253,14 @@ public class db {
         ResultSet rs = null;
         try {
             con = getCon();
-            String query = "SELECT * FROM classes WHERE class_id = ?";
+            String query = "SELECT * FROM class WHERE id = ?";
             ps = con.prepareStatement(query);
             ps.setString(1, classId);
 
             rs = ps.executeQuery();
             if (rs.next()) {
                 data.Class classObj = new data.Class();
-                classObj.setClassId(rs.getString("class_id"));
+                classObj.setClassId(rs.getString("id"));
                 classObj.setName(rs.getString("name"));
                 classObj.setLevel(rs.getString("level"));
                 classObj.setCourse(rs.getString("course"));
@@ -271,29 +278,64 @@ public class db {
 
 // Add a Teacher to the database
     public static void addTeacher(Teacher teacher) throws SQLException {
-        Connection con = null;
-        PreparedStatement ps = null;
-        try {
-            con = getCon();
-            String query = "INSERT INTO teachers (teacher_id, name, age, position, gender, email) VALUES (?, ?, ?, ?, ?, ?)";
-            ps = con.prepareStatement(query);
-
-            ps.setString(1, teacher.getTeacherId());
-            ps.setString(2, teacher.getName());
-            ps.setString(3, teacher.getAge());
-            ps.setString(4, teacher.getPosition());
-            ps.setString(5, teacher.getGender());
-            ps.setString(6, teacher.getEmail());
-
-            ps.executeUpdate();
+    Connection con = null;
+    PreparedStatement ps = null;
+    try {
+        con = getCon();
+        String query = "INSERT INTO teacher (id,  position,  age ) VALUES (?, ?, ? )";
+        ps = con.prepareStatement(query);
+        
+        ps.setString(1, teacher.getId());
+        
+        ps.setString(2, teacher.getPosition());
+        
+        ps.setString(3, teacher.getAge());
+        
+        
+        int rowsInserted = ps.executeUpdate();
+        addUser(teacher);
+        if (rowsInserted > 0) {
             System.out.println("Teacher added successfully: " + teacher.getName());
-        } catch (SQLException e) {
-            System.err.println("Error adding teacher: " + e.getMessage());
-            throw e;
-        } finally {
-            closeResources(con, ps, null);
+        } else {
+            System.err.println("Error adding teacher: No rows were inserted.");
         }
+    } catch (SQLException e) {
+        System.err.println("Error adding teacher: " + e.getMessage());
+        throw e;
+    } finally {
+        closeResources(con, ps, null);
     }
+}
+    
+    public static void addStudent(Student stu) throws SQLException {
+    Connection con = null;
+    PreparedStatement ps = null;
+    try {
+        con = getCon();
+        String query = "INSERT INTO student (id,  score,  grade ) VALUES (?, ?, ? )";
+        ps = con.prepareStatement(query);
+        
+        ps.setString(1, stu.getId());
+        
+        ps.setString(2, stu.getScore());
+        
+        ps.setString(3, stu.getGrade());
+        
+        
+        int rowsInserted = ps.executeUpdate();
+        addUser(stu);
+        if (rowsInserted > 0) {
+            System.out.println("stu added successfully: " + stu.getName());
+        } else {
+            System.err.println("Error adding stu: No rows were inserted.");
+        }
+    } catch (SQLException e) {
+        System.err.println("Error adding stu: " + e.getMessage());
+        throw e;
+    } finally {
+        closeResources(con, ps, null);
+    }
+}
 
 // Retrieve a Teacher by their ID
     public static Teacher getTeacherById(String teacherId) throws SQLException {
@@ -313,7 +355,7 @@ public class db {
                 teacher.setName(rs.getString("name"));
                 teacher.setAge(rs.getString("age"));
                 teacher.setPosition(rs.getString("position"));
-                teacher.setGender(rs.getString("gender"));
+             
                 teacher.setEmail(rs.getString("email"));
                 return teacher;
             }
@@ -388,6 +430,56 @@ public class db {
             closeResources(con, ps, rs);
         }
     }
+    
+    // Add Score and Grade to the User
+public static void addScoreGrade(int scorePercentage, User user) throws SQLException {
+    Connection con = null;
+    PreparedStatement ps = null;
+
+    // Determine the grade based on score percentage
+    String grade = calculateGrade(scorePercentage);
+    
+    try {
+        // Set the score and grade for the user
+        con = getCon();
+        
+        // Assuming you want to update the grade and score in the user table
+        String query = "UPDATE student SET score = ?, grade = ? WHERE id = ?";
+        ps = con.prepareStatement(query);
+        
+        ps.setInt(1, scorePercentage);  // Set the score
+        ps.setString(2, grade);          // Set the grade
+        ps.setString(3, user.getId());   // Set the user ID
+
+        // Execute the update
+        int rowsUpdated = ps.executeUpdate();
+
+        if (rowsUpdated > 0) {
+            System.out.println("Score and grade updated successfully for user: " + user.getName());
+        } else {
+            System.err.println("Error updating score and grade: No rows were updated.");
+        }
+    } catch (SQLException e) {
+        System.err.println("Error updating score and grade: " + e.getMessage());
+        throw e;
+    } finally {
+        closeResources(con, ps, null);
+    }
+}
+
+// Helper method to calculate the grade based on the score percentage
+private static String calculateGrade(int scorePercentage) {
+    if (scorePercentage > 90) {
+        return "A";
+    } else if (scorePercentage > 80) {
+        return "B";
+    } else if (scorePercentage > 70) {
+        return "C";
+    } else {
+        return "D";
+    }
+}
+
 
     // Existing addQuestion and getQuestionById methods remain the same
     public static void main(String[] args) {

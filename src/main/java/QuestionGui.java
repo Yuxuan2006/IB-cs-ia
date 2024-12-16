@@ -1,8 +1,13 @@
 
 import data.Question;
+import data.User;
+import java.sql.SQLException;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import util.EmailSender;
+import util.db;
 
 public class QuestionGui extends javax.swing.JFrame {
 
@@ -11,8 +16,11 @@ public class QuestionGui extends javax.swing.JFrame {
     private ArrayList<Question> questions;
     private int correctAnswers = 0;
     private boolean[] answeredQuestions;
+    
+    public static User user ;
 
-    public QuestionGui(ArrayList<Question> questionsInput) {
+    public QuestionGui(ArrayList<Question> questionsInput, User user) {
+        this.user = user;
         this.questions = questionsInput;
         this.numberOfQuestion = questionsInput.size();
         this.answeredQuestions = new boolean[numberOfQuestion];
@@ -105,14 +113,6 @@ public class QuestionGui extends javax.swing.JFrame {
                 jRadioButton5ActionPerformed(evt);
             }
         });
-
-        ALabel.setText("jLabel3");
-
-        BLabel.setText("jLabel3");
-
-        CLabel.setText("jLabel3");
-
-        DLabel.setText("jLabel3");
 
         jButton1.setText("Check answer");
 
@@ -226,6 +226,12 @@ public class QuestionGui extends javax.swing.JFrame {
         if (numberOfQuestion == index) {
             //show finish screen
             int scorePercentage = calculateScorePercentage();
+            
+            try {
+                db.addScoreGrade(scorePercentage,user);
+            } catch (SQLException ex) {
+                Logger.getLogger(QuestionGui.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
             EmailSender sender = new EmailSender("re_D7vnPUmY_QGs8r2NpeyzEC7XJnhuB2Ly9");
 

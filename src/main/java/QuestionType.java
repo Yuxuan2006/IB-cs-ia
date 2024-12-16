@@ -1,4 +1,5 @@
 import data.Question;
+import data.User;
 import java.util.ArrayList;
 import util.AI;
 import static util.QuestionArrayCreator.parseQuestionsFromJson;
@@ -7,9 +8,11 @@ public class QuestionType extends javax.swing.JFrame {
     String topic;
     String difficulty;
     int number;
+    User user;
 
-    public QuestionType() {
+    public QuestionType(User user) {
         initComponents();
+        this.user = user;
     }
 
     public static String generatePrompt(String topic, String diff, int num) {
@@ -225,17 +228,10 @@ public class QuestionType extends javax.swing.JFrame {
         String res = AI.GeminiApi(generatePrompt(topic,difficulty,number));
         ArrayList<Question> questions = parseQuestionsFromJson(res);
         System.out.println(res);
-        new QuestionGui(questions).setVisible(true);
+        new QuestionGui(questions, user).setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    public static void main(String args[]) {
 
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new QuestionType().setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton EasyButton;

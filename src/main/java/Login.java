@@ -7,9 +7,9 @@ import javax.swing.JOptionPane;
 import util.db;
 import static util.db.getUserByEmail;
 
-public class LoginStudent extends javax.swing.JFrame {
+public class Login extends javax.swing.JFrame {
 
-    public LoginStudent() {
+    public Login() {
         initComponents();
     }
 
@@ -24,6 +24,7 @@ public class LoginStudent extends javax.swing.JFrame {
         LoginButton = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -38,9 +39,21 @@ public class LoginStudent extends javax.swing.JFrame {
             }
         });
 
-        jButton1.setText("Make a new accout");
+        jButton1.setText("make a new student account");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
-        jLabel3.setText("Student Login");
+        jLabel3.setText("Login");
+
+        jButton2.setText("make a new teacher account");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -64,8 +77,11 @@ public class LoginStudent extends javax.swing.JFrame {
                         .addComponent(jButton1))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(241, 241, 241)
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(94, Short.MAX_VALUE))
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(332, 332, 332)
+                        .addComponent(jButton2)))
+                .addContainerGap(70, Short.MAX_VALUE))
         );
 
         layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jLabel1, jLabel2});
@@ -89,7 +105,9 @@ public class LoginStudent extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(LoginButton)
                     .addComponent(jButton1))
-                .addContainerGap(140, Short.MAX_VALUE))
+                .addGap(31, 31, 31)
+                .addComponent(jButton2)
+                .addContainerGap(86, Short.MAX_VALUE))
         );
 
         pack();
@@ -105,6 +123,16 @@ public class LoginStudent extends javax.swing.JFrame {
 
 
     }//GEN-LAST:event_LoginButtonActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+      this.setVisible(false);
+            new StudentRegistration().setVisible(true);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+       this.setVisible(false);
+            new TeacherRegistration().setVisible(true);
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     public void login() throws SQLException {
         String email = emailField.getText();
@@ -122,8 +150,12 @@ public class LoginStudent extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "<html><b style=\"color: red; font-size: 10px\">incorrect password</b></html>", "Error", JOptionPane.INFORMATION_MESSAGE, icon);
             } else {
                 this.setVisible(false);
-            new QuestionType().setVisible(true);
-
+                if (user.getTeacher_id() != null) {
+            new Teacherhub(user).setVisible(true);
+                } else {
+                new QuestionType(user).setVisible(true);
+                }
+                
             }
         }
     }
@@ -132,7 +164,7 @@ public class LoginStudent extends javax.swing.JFrame {
 
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new LoginStudent().setVisible(true);
+                new Login().setVisible(true);
             }
         });
     }
@@ -142,6 +174,7 @@ public class LoginStudent extends javax.swing.JFrame {
     private javax.swing.JPasswordField PasswordField;
     private javax.swing.JTextField emailField;
     private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

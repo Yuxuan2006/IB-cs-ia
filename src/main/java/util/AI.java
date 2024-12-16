@@ -8,8 +8,8 @@ import java.net.http.HttpResponse;
 
 public class AI {
     public static String GeminiApi(String prompt) {
-        String apiKey = "AIzaSyDycjmo_ZNcvEhQPDZ1GOPdaSNdoIiDz2c"; // Store this securely
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=" + apiKey;
+        String apiKey = "AIzaSyBj0I6bYalAnTiQBil0r4J_EOUuuqYSu3o"; // Store this securely
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
         
         // Escape special characters in the prompt
         prompt = prompt.replace("\"", "\\\"")

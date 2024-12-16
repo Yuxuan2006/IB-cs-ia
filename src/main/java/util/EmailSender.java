@@ -108,7 +108,7 @@ public class EmailSender {
             "Practice more time management during tests",
             "Focus on showing detailed work in calculations"
         };
-        String name = "kaodk";
+        String name = "YuXuan";
 
         sender.sendTestResults(
                 "yuxuanxu2006@gmail.com",

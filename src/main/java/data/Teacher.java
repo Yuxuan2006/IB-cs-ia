@@ -4,7 +4,7 @@ public class Teacher extends User {
     private String teacherId;
     private String age;
     private String position; 
-    private String gender;
+   
 
     
     public String getTeacherId() {
@@ -34,11 +34,5 @@ public class Teacher extends User {
     }
 
     
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
+   
 }
